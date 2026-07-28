@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: waypoint-backend
+    environment:
+      - PORT=4000
+      - JWT_SECRET=${JWT_SECRET:-change_this_secret_in_production}
+    volumes:
+      - backend_data:/app/data
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+    container_name: waypoint-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_data:
