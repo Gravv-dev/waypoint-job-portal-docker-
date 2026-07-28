@@ -1,94 +1,139 @@
-# Waypoint — Full-Stack Job Portal
+# 🧭 Waypoint — Full-Stack Job Portal
 
-A real, working job portal: job seekers search and apply to jobs; employers post
-jobs and manage applicants through a status pipeline (Applied → Reviewed →
-Interview → Offer / Rejected).
+A real, working job portal where job seekers search & apply for jobs, and employers post listings and manage applicants through a hiring pipeline — **Applied → Reviewed → Interview → Offer**.
 
-## Stack
+Built as a genuine full-stack app: JWT authentication, a real SQL database, role-based access control, and a fully containerized Docker setup.
 
-- **Backend:** Node.js, Express, JWT auth, bcrypt password hashing, **SQLite**
-  (via Node's built-in `node:sqlite` module — a real relational database with
-  tables, foreign keys, and indexes, and no separate database server to install)
-- **Frontend:** React 19, Vite, React Router, Tailwind CSS v4, Axios
+---
 
-> **Requires Node.js 22.5+** (ideally 22.13+, so SQLite works without any flags).
-> `node -v` to check. `node:sqlite` is still an experimental API in Node — you'll
-> see a one-line `ExperimentalWarning` in the console, which is expected and
-> harmless.
-
-## Project structure
-
-```
-job-portal/
-  backend/     Express API (port 4000)
-  frontend/    React app (port 5173 in dev)
-```
-
-## 1. Run the backend
-
-```bash
-cd backend
-npm install
-npm run seed     # creates demo accounts + sample jobs (safe to re-run, resets data)
-npm start         # starts the API on http://localhost:4000
-```
-
-Demo accounts (created by the seed script):
-
-| Role       | Email                | Password      |
-|------------|-----------------------|---------------|
-| Job seeker | jobseeker@demo.com    | password123   |
-| Employer   | employer@demo.com     | password123   |
-
-Data is stored in `backend/data/waypoint.db`, a real SQLite database file with
-three tables (`users`, `jobs`, `applications`) linked by foreign keys. Delete
-that file (or re-run `npm run seed`) to reset everything. You can also open it
-directly with any SQLite browser (e.g. `sqlite3 backend/data/waypoint.db` or
-the "DB Browser for SQLite" app) to inspect the data.
-
-## 2. Run the frontend
-
-In a **second terminal**:
-
-```bash
-cd frontend
-npm install
-npm run dev       # starts the app on http://localhost:5173
-```
-
-Open http://localhost:5173 in your browser. The frontend is already configured
-(via `frontend/.env`) to talk to the backend at `http://localhost:4000/api`.
-
-## Features
+## ✨ Features
 
 **Job seekers**
-- Browse and search jobs by keyword, location, and job type
-- View full job details
-- Apply with a cover letter
-- Track every application's status on a visual pipeline ("My applications")
+- 🔍 Search & filter jobs by keyword, location, and job type
+- 📄 View full job details
+- ✉️ Apply with a cover letter
+- 📊 Track every application's status on a visual pipeline
 
 **Employers**
-- Register a company account
-- Post new job listings
-- View all applicants per job, with cover letters
-- Move applicants through statuses (Applied, Reviewed, Interview, Offer, Rejected)
-- Close/reopen or manage listings from a dashboard
+- 🏢 Register a company account
+- 📝 Post new job listings
+- 👥 View all applicants per job with their cover letters
+- 🔄 Move applicants through hiring stages (Applied, Reviewed, Interview, Offer, Rejected)
+- ⏸️ Close/reopen listings from a dashboard
 
-**Auth & security**
+**Security**
 - JWT-based sessions (7-day expiry)
 - Passwords hashed with bcrypt
 - Role-based route protection on both frontend and backend
-- Server-side validation on all inputs
+- Server-side input validation on every endpoint
 
-## Notes on going to production
+---
 
-This is a fully functional local dev setup with a real SQL database. Before
-deploying publicly you'd want to:
-- Move to a hosted database (Postgres via a service like Supabase/Neon/RDS) if
-  you need multiple app servers writing concurrently — SQLite is a single file
-  and is best suited to a single backend process, which is exactly this setup
-- Set a strong, secret `JWT_SECRET` in `backend/.env`
-- Add file uploads for resumes (currently applications use a text cover letter)
-- Add HTTPS, rate limiting, and CORS restricted to your real frontend domain
-- Host the frontend build (`npm run build` → `frontend/dist`) on a static host
-  (Vercel/Netlify) and the backend on a Node host (Render/Railway/Fly.io)
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend runtime | Node.js 22 |
+| Backend framework | Express 5 |
+| Database | **SQLite** (via Node's built-in `node:sqlite`) — real relational DB, no external DB server needed |
+| Auth | JWT (`jsonwebtoken`) + bcrypt |
+| Validation | `express-validator` |
+| Frontend | React 19 + Vite |
+| Routing | React Router v6 |
+| Styling | Tailwind CSS v4 |
+| HTTP client | Axios |
+| Production serving | **nginx** (reverse-proxies API requests to the backend) |
+| Containerization | Docker + Docker Compose |
+
+---
+
+## 🚀 Quick Start with Docker (recommended)
+
+The whole app — frontend, backend, and database — runs with one command.
+
+```bash
+git clone https://github.com/Gravv-dev/waypoint-job-portal.git
+cd waypoint-job-portal
+
+cp .env.example .env       # then open .env and set a real JWT_SECRET
+docker compose up --build
+```
+
+Once it's up:
+- App (nginx): **http://localhost**
+- Backend API directly: **http://localhost:4000/api** *(for debugging only)*
+
+The database auto-seeds with demo data the first time it runs. Your data persists across restarts in a Docker volume — to reset everything, run `docker compose down -v`.
+
+### Demo accounts
+
+| Role | Email | Password |
+|---|---|---|
+| Job seeker | `jobseeker@demo.com` | `password123` |
+| Employer | `employer@demo.com` | `password123` |
+
+---
+
+## 🧑‍💻 Running locally without Docker
+
+**Backend**
+```bash
+cd backend
+npm install
+npm run seed      # creates demo accounts + sample jobs
+npm start          # http://localhost:4000
+```
+
+**Frontend** (in a second terminal)
+```bash
+cd frontend
+npm install
+npm run dev         # http://localhost:5173
+```
+
+> Requires Node.js **22.5+** (ideally 22.13+) since the database uses Node's built-in, still-experimental `node:sqlite` module. You may see a one-line `ExperimentalWarning` in the console — that's expected and harmless.
+
+---
+
+## 📁 Project Structure
+
+```
+waypoint-job-portal/
+├── backend/
+│   ├── server.js          # Express app entry point
+│   ├── db.js              # SQLite schema & connection
+│   ├── seed.js            # Demo data seeder
+│   ├── routes/            # auth, jobs, applications
+│   ├── middleware/         # JWT auth & role guards
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── pages/          # Home, JobDetail, Login, Register, dashboards…
+│   │   ├── components/      # Navbar, JobCard, WaypointRail…
+│   │   └── context/          # AuthContext
+│   ├── nginx.conf            # SPA routing + API reverse proxy
+│   └── Dockerfile
+├── docker-compose.yml
+└── .env.example
+```
+
+---
+
+## 🗄️ Database
+
+Data lives in `backend/data/waypoint.db` — a real SQLite file with three tables (`users`, `jobs`, `applications`) linked by foreign keys, with `ON DELETE CASCADE` and unique constraints (e.g. you can't apply to the same job twice). Inspect it anytime with any SQLite browser (e.g. DB Browser for SQLite).
+
+---
+
+## 🌱 Future improvements
+
+- Swap SQLite for Postgres if scaling to multiple backend instances
+- Resume file uploads (currently cover letters are plain text)
+- Email notifications on status changes
+- Admin role for platform moderation
+
+---
+
+## 📄 License
+
+This project is open for learning and personal use.
